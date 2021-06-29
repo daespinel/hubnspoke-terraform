@@ -67,7 +67,7 @@ resource "azurerm_network_interface" "spoke2-nic" {
 
 }
 
-resource "azurerm_virtual_machine" "spoke2-vm" {
+/*resource "azurerm_virtual_machine" "spoke2-vm" {
   name = "${local.prefix-spoke2}-vm"
   location = azurerm_resource_group.spoke2-vnet-rg.location
   resource_group_name = azurerm_resource_group.spoke2-vnet-rg.name
@@ -101,7 +101,7 @@ resource "azurerm_virtual_machine" "spoke2-vm" {
   tags = {
     environment = local.prefix-spoke2
   }
-}
+}*/
 
 resource "azurerm_virtual_network_peering" "hub-spoke2-peer" {
   name = "hub-spoke2-peer"
