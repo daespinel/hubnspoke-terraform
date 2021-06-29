@@ -5,8 +5,8 @@ locals {
 }
 
 resource "azurerm_resource_group" "onprem-vnet-rg" {
-  name     = locals.onprem-resource-group
-  location = locals.onprem-location
+  name     = local.onprem-resource-group
+  location = local.onprem-location
 }
 
 resource "azurerm_virtual_network" "onprem-vnet" {
@@ -15,7 +15,7 @@ resource "azurerm_virtual_network" "onprem-vnet" {
   resource_group_name = azurerm_resource_group.onprem-vnet-rg.name
   address_space       = ["192.168.0.0/16"]
   tags = {
-    environment = locals.prefix-onprem
+    environment = local.prefix-onprem
   }
 }
 
@@ -23,34 +23,34 @@ resource "azurerm_subnet" "onprem-gateway-subnet" {
   name                 = "GatewaySubnet"
   resource_group_name  = azurerm_resource_group.onprem-vnet-rg.name
   virtual_network_name = azurerm_virtual_network.onprem-vnet.name
-  adress_prefixes      = ["192.168.255.224/27"]
+  address_prefixes      = ["192.168.255.224/27"]
 }
 
 resource "azurerm_subnet" "onprem-mgmt-subnet" {
   name                 = "ManagementSubnet"
   resource_group_name  = azurerm_resource_group.onprem-vnet-rg.name
   virtual_network_name = azurerm_virtual_network.onprem-vnet.name
-  adress_prefixes      = ["192.168.1.128/25"]
+  address_prefixes      = ["192.168.1.128/25"]
 }
 
 resource "azurerm_public_ip" "onprem-pip" {
-  name                = "${locals.prefix-onprem}-pip"
+  name                = "${local.prefix-onprem}-pip"
   location            = azurerm_resource_group.onprem-vnet-rg.location
   resource_group_name = azurerm_resource_group.onprem-vnet-rg.name
   allocation_method   = "Dynamic"
   tags = {
-    environment = locals.prefix-onprem
+    environment = local.prefix-onprem
   }
 }
 
 resource "azurerm_network_interface" "onprem-nic" {
-  name                 = "${locals.prefix-onprem}-nic"
+  name                 = "${local.prefix-onprem}-nic"
   location             = azurerm_resource_group.onprem-vnet-rg.location
   resource_group_name  = azurerm_resource_group.onprem-vnet-rg.name
   enable_ip_forwarding = true
 
   ip_configuration {
-    name                          = locals.prefix-onprem
+    name                          = local.prefix-onprem
     subnet_id                     = azurerm_subnet.onprem-mgmt-subnet.id
     private_ip_address_allocation = "Dynamic"
     public_ip_address_id          = azurerm_public_ip.onprem-pip.id
@@ -58,7 +58,7 @@ resource "azurerm_network_interface" "onprem-nic" {
 }
 
 resource "azurerm_network_security_group" "onprem-nsg" {
-  name                 = "${locals.prefix-onprem}-nsg"
+  name                 = "${local.prefix-onprem}-nsg"
   location             = azurerm_resource_group.onprem-vnet-rg.location
   resource_group_name  = azurerm_resource_group.onprem-vnet-rg.name
 
@@ -84,7 +84,7 @@ resource "azurerm_subnet_network_security_group_association" "mgmt-nsg-associati
 }
 
 resource "azurerm_virtual_machine" "onprem-vm" {
-  name                  = "${locals.prefix-onprem}-vm"
+  name                  = "${local.prefix-onprem}-vm"
   location              = azurerm_resource_group.onprem-vnet-rg.location
   resource_group_name   = azurerm_resource_group.onprem-vnet-rg.name
   network_interface_ids = [azurerm_network_interface.onprem-nic.id]
@@ -105,7 +105,7 @@ resource "azurerm_virtual_machine" "onprem-vm" {
   }
 
   os_profile {
-    computer_name  = "${locals.prefix-onprem}-vm"
+    computer_name  = "${local.prefix-onprem}-vm"
     admin_username = var.username
     admin_password = var.password
   }
@@ -115,19 +115,19 @@ resource "azurerm_virtual_machine" "onprem-vm" {
   }
 
   tags = {
-    environment = locals.prefix-onprem
+    environment = local.prefix-onprem
   }
 }
 
-resource "azurerm_public_ip" "onprem-vpn-gateway-pip" {
-  name                  = "${locals.prefix-onprem}-vpn-gateway1-pip"
+resource "azurerm_public_ip" "onprem-vpn-gateway1-pip" {
+  name                  = "${local.prefix-onprem}-vpn-gateway1-pip"
   location              = azurerm_resource_group.onprem-vnet-rg.location
   resource_group_name   = azurerm_resource_group.onprem-vnet-rg.name
   allocation_method     = "Dynamic"
 }
 
 resource "azurerm_virtual_network_gateway" "onprem-vpn-gateway" {
-  name                  = "${locals.prefix-onprem}-vpn-gateway1"
+  name                  = "${local.prefix-onprem}-vpn-gateway1"
   location              = azurerm_resource_group.onprem-vnet-rg.location
   resource_group_name   = azurerm_resource_group.onprem-vnet-rg.name
   type                  = "Vpn"
